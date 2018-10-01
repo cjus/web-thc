@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta name="description" content="Time Hacker Clock" />
+    <title>Time Hacker Clock</title>
+    <style>
+      body {
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/preact"></script>
+    <script>
+const {Component, h, render} = window.preact;
+const ONE_SECOND = 1000;
+
+class Clock extends Component {
+  constructor() {
+    super();
+  }
+
+  polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+    var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+    return {
+      x: centerX + (radius * Math.cos(angleInRadians)),
+      y: centerY + (radius * Math.sin(angleInRadians))
+    };
+  }
+
+  describeArc(x, y, radius, startAngle, endAngle) {
+    var start = polarToCartesian(x, y, radius, endAngle);
+    var end = polarToCartesian(x, y, radius, startAngle);
+    var largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+    var d = [
+      'M', start.x, start.y,
+      'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y
+    ].join(' ');
+    return d;
+  }
+
+  render(props, state) {
+    return (
+      h('div', {id: 'clock'},
+      )
+    );
+  }
+}
+
+class App extends Component {
+  componentDidMount() {
+    this.setState({
+      title: 'Time Hacker Clock'
+    });
+  }
+
+  render(props, state) {
+    return (
+      h('div', {id: 'app'},
+        h(Clock, {}, '')
+      )
+    );
+  }
+}
+
+render(h(App), document.body);
+    </script>
+  </body>
+</html>
