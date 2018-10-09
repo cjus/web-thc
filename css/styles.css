@@ -1,0 +1,58 @@
+body {
+  background-color: black;
+  color: #66CD00;
+  font-family: 'Roboto Mono'
+}
+
+#clockPage {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  background-size: 100%;
+  margin: 10px;
+  padding: 0;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.hitarea {
+  fill: yellow;
+  fill-opacity: 0;
+}
+
+.simple-button {
+  padding-right: 5px;
+  cursor: pointer;
+}
+
+#button-bar {
+  float: right;
+  margin: 10px;
+}
+
+#clock-hit {
+  width: 95%;
+}
+
+.dialog {
+  padding: 10px;
+  margin: 10px;
+}
+
+span {
+  font-size: 14px;
+}
+
+p {
+  padding-top: 5px;
+  font-size: 14px;
+}

@@ -5,67 +5,30 @@
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta name="description" content="Time Hacker Clock" />
     <title>Time Hacker Clock</title>
-    <style>
-      body {
-        background-color: white;
-      }
-    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/styles.css" media="screen" />
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900italic,900' rel='stylesheet' type='text/css'>
   </head>
   <body>
+    <div id="clockPage">
+      <svg id="digital-body" width="360" height="360" viewport="0 0 360 360">
+        <path id="arc1" />
+        <path id="arc2" />
+        <path id="arc3" />
+        <text class="noselect" id="curTime" x="50%" y="45%" alignment-baseline="middle" text-anchor="middle" font-size="48"></text>
+        <text class="noselect"  id="countdownTime" x="50%" y="60%" alignment-baseline="middle" text-anchor="middle" font-size="32"></text>
+        <text class="noselect"  id="version" x="50%" y="80%" alignment-baseline="middle" text-anchor="middle" font-size="20"></text>
+        <ellipse class="hitarea" id="top-hit" cx="50%" cy="10%" rx="30%" ry="10%" onclick="window.clickTP();"/>
+        <ellipse class="hitarea" id="left-hit" cx="10%" cy="50%" rx="10%" ry="30%" onclick="window.clickLT();"/>
+        <ellipse class="hitarea" id="right-hit" cx="90%" cy="50%" rx="10%" ry="30%" onclick="window.clickRT();"/>
+        <ellipse class="hitarea" id="center-hit" cx="50%" cy="50%" rx="25%" ry="25%" onclick="window.clickCT();"/>
+        <ellipse class="hitarea" id="bottom-hit" cx="50%" cy="90%" rx="30%" ry="10%" onclick="window.clickBT();"/>
+      </svg>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/preact"></script>
-    <script>
-const {Component, h, render} = window.preact;
-const ONE_SECOND = 1000;
-
-class Clock extends Component {
-  constructor() {
-    super();
-  }
-
-  polarToCartesian(centerX, centerY, radius, angleInDegrees) {
-    var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-    return {
-      x: centerX + (radius * Math.cos(angleInRadians)),
-      y: centerY + (radius * Math.sin(angleInRadians))
-    };
-  }
-
-  describeArc(x, y, radius, startAngle, endAngle) {
-    var start = polarToCartesian(x, y, radius, endAngle);
-    var end = polarToCartesian(x, y, radius, startAngle);
-    var largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-    var d = [
-      'M', start.x, start.y,
-      'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y
-    ].join(' ');
-    return d;
-  }
-
-  render(props, state) {
-    return (
-      h('div', {id: 'clock'},
-      )
-    );
-  }
-}
-
-class App extends Component {
-  componentDidMount() {
-    this.setState({
-      title: 'Time Hacker Clock'
-    });
-  }
-
-  render(props, state) {
-    return (
-      h('div', {id: 'app'},
-        h(Clock, {}, '')
-      )
-    );
-  }
-}
-
-render(h(App), document.body);
-    </script>
+    <script src="./js/thc.js"></script>
   </body>
 </html>
