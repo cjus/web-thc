@@ -34,6 +34,10 @@ body {
   cursor: pointer;
 }
 
+#button {
+  cursor: pointer;
+}
+
 #button-bar {
   float: right;
   margin: 10px;
