@@ -1,7 +1,8 @@
 body {
   background-color: black;
   color: #66CD00;
-  font-family: 'Roboto Mono'
+  font-family: 'Roboto Mono';
+  font-size: 14px;
 }
 
 #clockPage {
@@ -9,7 +10,7 @@ body {
   width: 360px;
   height: 360px;
   background-size: 100%;
-  margin: 10px;
+  margin: 0;
   padding: 0;
   background-repeat: no-repeat;
   overflow: hidden;
@@ -52,11 +53,6 @@ body {
   margin: 10px;
 }
 
-span {
-  font-size: 14px;
-}
-
 p {
   padding-top: 5px;
-  font-size: 14px;
 }
