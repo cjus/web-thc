@@ -1,26 +1,20 @@
 const {Component, h, render} = window.preact;
 const TOTAL_BACKGROUNDS = 5;
-const VERSION = 'v022';
+const VERSION = 'v024';
 const DEGREES = 359.9;
 const RING1 = 170;
 const RING2 = 156;
 const RING3 = 145;
 
-var THCSettings = {
-  textColorIndex: 0,
-  backgroundId: 0,
-  rangeStart: 5,
-  rangeEnd: 20
-};
-
 class Clock extends Component {
   constructor() {
     super();
-    this.init();
-  }
-
-  init() {
-    THCSettings = Object.assign(THCSettings, JSON.parse(localStorage.getItem('settings') || '{}'));
+    this.THCSettings = {
+      textColorIndex: 0,
+      backgroundId: 1,
+      rangeStart: 5,
+      rangeEnd: 20
+    };
     this.textColors = [
       '#00F5FF',
       '#00BAFF',
@@ -39,9 +33,16 @@ class Clock extends Component {
       '#00FF6C',
       '#00FFBA'
     ];
+  }
 
-    this.textColorIndex = THCSettings.textColorIndex;
-    this.backgroundId = THCSettings.backgroundId;
+  componentDidMount() {
+    this.init();
+  }
+
+  init() {
+    this.THCSettings = Object.assign(this.THCSettings, JSON.parse(localStorage.getItem('settings') || '{}'));
+    this.textColorIndex = this.THCSettings.textColorIndex;
+    this.backgroundId = this.THCSettings.backgroundId;
     this.interval;
     this.lastClick = 9999;
     this.sprintStart = 0;
@@ -49,76 +50,98 @@ class Clock extends Component {
     this.totalSprintSegmentsPerSecond = DEGREES / (15 * 60);
     this.lastHour = 0;
 
-    this.initDigitalWatch();
+    this.changeBackground();
+    this.changeTextColor('curTime');
+    this.changeTextColor('countdownTime');
+    this.changeTextColor('version');
+    this.changeRingColors();
 
     document.getElementById('version').innerHTML = VERSION;
-
     let el = document.getElementById('arc1');
-    el.setAttribute('d', Clock.describeArc(180, 180, RING1, 0, DEGREES));
+    el.setAttribute('d', this.describeArc(180, 180, RING1, 0, DEGREES));
 
-    window.clickTP = () => {
-      let now = new Date();
-      let curClick = now.getTime();
-      if ((curClick / 1000 - this.lastClick / 1000) < 1) {
-        if (this.textColorIndex + 1 === this.textColors.length) {
-          this.textColorIndex = 0;
-        } else {
-          this.textColorIndex++;
-        }
-        this.changeTextColor('curTime');
-        this.changeTextColor('countdownTime');
-        this.changeTextColor('version');
-        this.changeRingColors();
-      } else {
-        this.lastClick = curClick;
-      }
-    }
+    this.bindEvents();
+  }
 
-    window.clickLT = () => {
-      let now = new Date();
-      let curClick = now.getTime();
-      if ((curClick / 1000 - this.lastClick / 1000) < 1) {
-        if (this.backgroundId - 1 < 1) {
-          this.backgroundId = 1;
-        } else {
-          this.backgroundId--;
-        }
-        this.changeBackground();
-      } else {
-        this.lastClick = curClick;
-      }
-    }
+  bindEvents() {
+    let el;
+    el = document.getElementById('top-hit');
+    el.addEventListener('click', this.clickTP.bind(this));
 
-    window.clickRT = () => {
-      let now = new Date();
-      let curClick = now.getTime();
-      if ((curClick / 1000 - this.lastClick / 1000) < 1) {
-        if (this.backgroundId + 1 > TOTAL_BACKGROUNDS) {
-          this.backgroundId = TOTAL_BACKGROUNDS;
-        } else {
-          this.backgroundId++;
-        }
-        this.changeBackground();
-      } else {
-        this.lastClick = curClick;
-      }
-    }
+    el = document.getElementById('left-hit');
+    el.addEventListener('click', this.clickLT.bind(this));
 
-    window.clickBT = () => {
-      let now = new Date();
-      this.lastHour = now.getHours();
-      this.sprintStart = (new Date()).getTime();
-      if ((this.sprintStart / 1000 - this.lastSprintStart / 1000) > 1) {
-        this.lastSprintStart = this.sprintStart;
-        this.sprintStart = 0;
+    el = document.getElementById('right-hit');
+    el.addEventListener('click', this.clickRT.bind(this));
+
+    el = document.getElementById('bottom-hit');
+    el.addEventListener('click', this.clickBT.bind(this));
+
+    this.interval = setInterval(this.updateWatch.bind(this), 1000);
+  }
+
+  clickTP() {
+    let now = new Date();
+    let curClick = now.getTime();
+    if ((curClick / 1000 - this.lastClick / 1000) < 1) {
+      if (this.textColorIndex + 1 === this.textColors.length) {
+        this.textColorIndex = 0;
       } else {
-        var el = document.getElementById('arc2');
-        el.setAttribute('d', Clock.describeArc(180, 180, RING2, 0, DEGREES));
+        this.textColorIndex++;
       }
+      this.changeTextColor('curTime');
+      this.changeTextColor('countdownTime');
+      this.changeTextColor('version');
+      this.changeRingColors();
+    } else {
+      this.lastClick = curClick;
     }
   }
 
-  static polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  clickLT() {
+    let now = new Date();
+    let curClick = now.getTime();
+    if ((curClick / 1000 - this.lastClick / 1000) < 1) {
+      if (this.backgroundId - 1 < 1) {
+        this.backgroundId = 1;
+      } else {
+        this.backgroundId--;
+      }
+      this.changeBackground();
+    } else {
+      this.lastClick = curClick;
+    }
+  }
+
+  clickRT() {
+    let now = new Date();
+    let curClick = now.getTime();
+    if ((curClick / 1000 - this.lastClick / 1000) < 1) {
+      if (this.backgroundId + 1 > TOTAL_BACKGROUNDS) {
+        this.backgroundId = TOTAL_BACKGROUNDS;
+      } else {
+        this.backgroundId++;
+      }
+      this.changeBackground();
+    } else {
+      this.lastClick = curClick;
+    }
+  }
+
+  clickBT() {
+    let now = new Date();
+    this.lastHour = now.getHours();
+    this.sprintStart = (new Date()).getTime();
+    if ((this.sprintStart / 1000 - this.lastSprintStart / 1000) > 1) {
+      this.lastSprintStart = this.sprintStart;
+      this.sprintStart = 0;
+    } else {
+      var el = document.getElementById('arc2');
+      el.setAttribute('d', this.describeArc(180, 180, RING2, 0, DEGREES));
+    }
+  }
+
+  polarToCartesian(centerX, centerY, radius, angleInDegrees) {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     return {
       x: centerX + (radius * Math.cos(angleInRadians)),
@@ -126,9 +149,9 @@ class Clock extends Component {
     };
   }
 
-  static describeArc(x, y, radius, startAngle, endAngle) {
-    let start = Clock.polarToCartesian(x, y, radius, endAngle);
-    let end = Clock.polarToCartesian(x, y, radius, startAngle);
+  describeArc(x, y, radius, startAngle, endAngle) {
+    let start = this.polarToCartesian(x, y, radius, endAngle);
+    let end = this.polarToCartesian(x, y, radius, startAngle);
     let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
     let d = [
       'M', start.x, start.y,
@@ -140,8 +163,8 @@ class Clock extends Component {
   changeTextColor(item) {
     let el = document.getElementById(item);
     el.setAttribute('style', 'fill: ' + this.textColors[this.textColorIndex] + '; fill-opacity: .75;');
-    THCSettings.textColorIndex = this.textColorIndex;
-    localStorage.setItem('settings', JSON.stringify(THCSettings));
+    this.THCSettings.textColorIndex = this.textColorIndex;
+    localStorage.setItem('settings', JSON.stringify(this.THCSettings));
   }
 
   changeRingColors() {
@@ -159,17 +182,16 @@ class Clock extends Component {
     if (this.backgroundId === TOTAL_BACKGROUNDS) {
       path = 'none';
     }
-    //document.getElementsByTagName('body')[0].style.backgroundImage = path;
     document.getElementById('clockPage').style.backgroundImage = path;
-    THCSettings.backgroundId = this.backgroundId;
-    localStorage.setItem('settings', JSON.stringify(THCSettings));
+    this.THCSettings.backgroundId = this.backgroundId;
+    localStorage.setItem('settings', JSON.stringify(this.THCSettings));
   }
 
   updateWatch() {
     let today = new Date();
     let curTime = today.getTime();
-    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeEnd, 0, 0).getTime();
-    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeStart, 0, 0).getTime();
+    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), this.THCSettings.rangeEnd, 0, 0).getTime();
+    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), this.THCSettings.rangeStart, 0, 0).getTime();
 
     let displayTime = (today).toLocaleTimeString().split(' ')[0];
 
@@ -182,23 +204,23 @@ class Clock extends Component {
     if (secSegments < totalsecSegmentsPerSecond) {
       secSegments = DEGREES;
     }
-    el2.setAttribute('d', Clock.describeArc(180, 180, RING3, 0, secSegments));
+    el2.setAttribute('d', this.describeArc(180, 180, RING3, 0, secSegments));
 
     if (this.sprintStart) {
       let sprintSegments = ((curTime - this.sprintStart) / 1000) * this.totalSprintSegmentsPerSecond;
       let el3 = document.getElementById('arc2');
       if (sprintSegments < DEGREES) {
-        el3.setAttribute('d', Clock.describeArc(180, 180, RING2, 0, DEGREES - sprintSegments));
+        el3.setAttribute('d', this.describeArc(180, 180, RING2, 0, DEGREES - sprintSegments));
       } else {
         this.sprintStart = 0;
-        el3.setAttribute('d', Clock.describeArc(180, 180, RING2, 0, 0));
+        el3.setAttribute('d', this.describeArc(180, 180, RING2, 0, 0));
       }
     }
 
     if (curTime < startTime || curTime > endTime) {
       document.getElementById('countdownTime').innerHTML = 'EXPIRED';
       let el = document.getElementById('arc1');
-      el.setAttribute('d', Clock.describeArc(180, 180, RING1, 0, 0));
+      el.setAttribute('d', this.describeArc(180, 180, RING1, 0, 0));
       return;
     }
 
@@ -220,16 +242,7 @@ class Clock extends Component {
     let segments = DEGREES - elapsedSegments;
 
     let el = document.getElementById('arc1');
-    el.setAttribute('d', Clock.describeArc(180, 180, RING1, 0, segments));
-  }
-
-  initDigitalWatch() {
-    this.changeBackground();
-    this.changeTextColor('curTime');
-    this.changeTextColor('countdownTime');
-    this.changeTextColor('version');
-    this.changeRingColors();
-    this.interval = setInterval(this.updateWatch, 1000);
+    el.setAttribute('d', this.describeArc(180, 180, RING1, 0, segments));
   }
 
   render(props, state) {
@@ -257,7 +270,6 @@ class App extends Component {
     let bodyElements = ('div', {}, '');
     let el;
 
-    console.log('state.showScreen', state.showScreen);
     switch (state.showScreen) {
       case 'clock':
         el = document.getElementById('clockPage');
