@@ -1,6 +1,6 @@
 const {Component, h, render} = window.preact;
 const TOTAL_BACKGROUNDS = 5;
-const VERSION = 'v024';
+const VERSION = 'v025';
 const DEGREES = 359.9;
 const RING1 = 170;
 const RING2 = 156;
