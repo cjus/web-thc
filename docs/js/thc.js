@@ -1,6 +1,6 @@
 const {Component, h, render} = window.preact;
 const TOTAL_BACKGROUNDS = 5;
-const VERSION = 'v025';
+const VERSION = 'v026';
 const DEGREES = 359.9;
 const RING1 = 170;
 const RING2 = 156;
@@ -78,6 +78,9 @@ class Clock extends Component {
     el.addEventListener('click', this.clickBT.bind(this));
 
     this.interval = setInterval(this.updateWatch.bind(this), 1000);
+    if (document.body.requestFullscreen) {
+      document.body.requestFullscreen();
+    }
   }
 
   clickTP() {
