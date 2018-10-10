@@ -302,7 +302,7 @@ class App extends Component {
         );
         break;
       case 'eject':
-        window.open ('http://localhost:8000/index.html','_blank', 'toolbar=false,scrollbars=yes,resizable=false,top=0,left=0, width=380,height=400');
+        window.open ('./index.html','_blank', 'toolbar=false,scrollbars=yes,resizable=false,top=0,left=0, width=380,height=400');
         this.setState({
           showScreen: 'clock'
         });
