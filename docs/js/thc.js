@@ -1,6 +1,6 @@
 const {Component, h, render} = window.preact;
 const TOTAL_BACKGROUNDS = 5;
-const VERSION = 'v0.28.0';
+const VERSION = 'v0.29.0';
 const DEGREES = 359.9;
 const RING1 = 170;
 const RING2 = 156;
@@ -217,6 +217,7 @@ class Clock extends Component {
       } else {
         this.sprintStart = 0;
         el3.setAttribute('d', this.describeArc(180, 180, RING2, 0, 0));
+        navigator.vibrate([1000, 1000, 2000, 1000]);
       }
     }
 
@@ -230,6 +231,7 @@ class Clock extends Component {
     let curHour = today.getHours();
     if (curHour !== this.lastHour) {
       this.lastHour = curHour;
+      navigator.vibrate(2000);
     }
 
     let distance = (endTime - curTime);
@@ -361,7 +363,7 @@ class App extends Component {
         );
         break;
       case 'eject':
-        window.open ('./thc.html','_blank', 'toolbar=false,scrollbars=yes,resizable=false,top=0,left=0, width=360,height=400');
+        window.open ('./thc.html','_blank', 'toolbar=false,scrollbars=yes,resizable=false,top=0,left=0, width=360,height=380');
         this.setState({
           showScreen: 'clock'
         });
