@@ -1,20 +1,21 @@
 const {Component, h, render} = window.preact;
 const TOTAL_BACKGROUNDS = 5;
-const VERSION = 'v026';
+const VERSION = 'v0.28.0';
 const DEGREES = 359.9;
 const RING1 = 170;
 const RING2 = 156;
 const RING3 = 145;
 
+var THCSettings = {
+  textColorIndex: 0,
+  backgroundId: 1,
+  rangeStart: 5,
+  rangeEnd: 20
+};
+
 class Clock extends Component {
   constructor() {
     super();
-    this.THCSettings = {
-      textColorIndex: 0,
-      backgroundId: 1,
-      rangeStart: 5,
-      rangeEnd: 20
-    };
     this.textColors = [
       '#00F5FF',
       '#00BAFF',
@@ -40,9 +41,8 @@ class Clock extends Component {
   }
 
   init() {
-    this.THCSettings = Object.assign(this.THCSettings, JSON.parse(localStorage.getItem('settings') || '{}'));
-    this.textColorIndex = this.THCSettings.textColorIndex;
-    this.backgroundId = this.THCSettings.backgroundId;
+    this.textColorIndex = THCSettings.textColorIndex;
+    this.backgroundId = THCSettings.backgroundId;
     this.interval;
     this.lastClick = 9999;
     this.sprintStart = 0;
@@ -166,8 +166,8 @@ class Clock extends Component {
   changeTextColor(item) {
     let el = document.getElementById(item);
     el.setAttribute('style', 'fill: ' + this.textColors[this.textColorIndex] + '; fill-opacity: .75;');
-    this.THCSettings.textColorIndex = this.textColorIndex;
-    localStorage.setItem('settings', JSON.stringify(this.THCSettings));
+    THCSettings.textColorIndex = this.textColorIndex;
+    localStorage.setItem('settings', JSON.stringify(THCSettings));
   }
 
   changeRingColors() {
@@ -186,15 +186,15 @@ class Clock extends Component {
       path = 'none';
     }
     document.getElementById('clockPage').style.backgroundImage = path;
-    this.THCSettings.backgroundId = this.backgroundId;
-    localStorage.setItem('settings', JSON.stringify(this.THCSettings));
+    THCSettings.backgroundId = this.backgroundId;
+    localStorage.setItem('settings', JSON.stringify(THCSettings));
   }
 
   updateWatch() {
     let today = new Date();
     let curTime = today.getTime();
-    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), this.THCSettings.rangeEnd, 0, 0).getTime();
-    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), this.THCSettings.rangeStart, 0, 0).getTime();
+    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeEnd, 0, 0).getTime();
+    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeStart, 0, 0).getTime();
 
     let displayTime = (today).toLocaleTimeString().split(' ')[0];
 
@@ -256,16 +256,46 @@ class Clock extends Component {
 }
 
 class App extends Component {
-  componentDidMount() {
-    this.setState({
+  constructor() {
+    super();
+    THCSettings = Object.assign(THCSettings, JSON.parse(localStorage.getItem('settings') || '{}'));
+    this.state = {
       title: 'Time Hacker Clock',
-      showScreen: 'clock'
+      showScreen: 'clock',
+      rangeStart: THCSettings.rangeStart || '5',
+      rangeEnd: THCSettings.rangeEnd || '20',
+    };
+  }
+
+  onButtonBarPress(bID) {
+    this.setState({
+      showScreen: bID
     });
   }
 
-  onPress(bID) {
+  onInputStartHourChange(event) {
     this.setState({
-      showScreen: bID
+      rangeStart: parseInt(event.target.value, 10)
+    });
+  }
+
+  onInputEndHourChange(event) {
+    this.setState({
+      rangeEnd: parseInt(event.target.value, 10)
+    });
+  }
+
+  onSubmit() {
+    let { rangeStart, rangeEnd }  = this.state;
+    if (rangeStart < 1 || rangeStart > 24 || rangeEnd < 1 || rangeEnd > 24 || rangeStart > rangeEnd) {
+      alert('Start hour must be less than End hour and both must be between 1 and 24 hours');
+      return;
+    }
+    THCSettings.rangeStart = rangeStart;
+    THCSettings.rangeEnd = rangeEnd;
+    localStorage.setItem('settings', JSON.stringify(THCSettings));
+    this.setState({
+      showScreen: 'clock'
     });
   }
 
@@ -279,9 +309,9 @@ class App extends Component {
         el.style.visibility = 'visible';
         bodyElements = (
           h('div', {id: 'button-bar'},
-            h('span', {class: 'simple-button noselect glyphicon glyphicon-cog', 'aria-hidden': true, onclick: this.onPress.bind(this, 'gear')},),
-            h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-question-sign', 'aria-hidden': true, onclick: this.onPress.bind(this, 'help')},),
-            h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-open', 'aria-hidden': true, onclick: this.onPress.bind(this, 'eject')},),
+            h('span', {class: 'simple-button noselect glyphicon glyphicon-cog', 'aria-hidden': true, onclick: this.onButtonBarPress.bind(this, 'gear')},),
+            h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-question-sign', 'aria-hidden': true, onclick: this.onButtonBarPress.bind(this, 'help')},),
+            h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-open', 'aria-hidden': true, onclick: this.onButtonBarPress.bind(this, 'eject')},),
           )
         );
         break;
@@ -291,11 +321,17 @@ class App extends Component {
         bodyElements = (
           h('div', {},
             h('div', {id: 'button-bar'},
-              h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-remove', 'aria-hidden': true, onclick: this.onPress.bind(this, 'clock')},)
+              h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-remove', 'aria-hidden': true, onclick: this.onButtonBarPress.bind(this, 'clock')},)
             ),
             h('div', {class: 'dialog'},
               h('h3', {}, 'Configure'),
-              h('p',{}, 'This is the config screen.')
+              h('p',{}, 'Set daily time range *'),
+              h('input', {class: 'form-input', type: 'number', min: '1', max: '24', placeholder: 'Start hour', value:`${state.rangeStart}`, onChange: this.onInputStartHourChange.bind(this)}, ),
+              h('input', {class: 'form-input', type: 'number', min: '1', max: '24', placeholder: 'End hour', value:`${state.rangeEnd}`, onChange: this.onInputEndHourChange.bind(this)}, ),
+              h('div', {},
+                h('button', {class: 'form-button', 'data-role': 'button', onclick: this.onSubmit.bind(this)}, 'Submit')
+              ),
+              h('p',{class: 'p-small'}, '* Use 24 hour clock time.'),
             )
           )
         );
@@ -306,7 +342,7 @@ class App extends Component {
         bodyElements = (
           h('div', {},
             h('div', {id: 'button-bar'},
-              h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-remove', 'aria-hidden': true, onclick: this.onPress.bind(this, 'clock')},)
+              h('span', {class: 'simple-button noselect glyphicon glyphicon glyphicon-remove', 'aria-hidden': true, onclick: this.onButtonBarPress.bind(this, 'clock')},)
             ),
             h('div', {class: 'dialog'},
               h('h3', {}, 'Help'),
