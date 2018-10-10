@@ -53,6 +53,27 @@ body {
   margin: 10px;
 }
 
+.form-button {
+  color: black;
+  font-size: 12px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.form-input {
+  font-size: 14px;
+  background-color: black;
+  color: #66CD00;
+  border-radius: 3px;
+  width: 100px;
+  margin-right: 5px;
+  margin: 0 5px 10px 0;
+}
+
 p {
   padding-top: 5px;
+}
+
+.p-small {
+  font-size: 10px;
 }
