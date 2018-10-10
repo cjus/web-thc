@@ -6,6 +6,13 @@ const RING1 = 170;
 const RING2 = 156;
 const RING3 = 145;
 
+var THCSettings = {
+  textColorIndex: 0,
+  backgroundId: 0,
+  rangeStart: 5,
+  rangeEnd: 20
+};
+
 class Clock extends Component {
   constructor() {
     super();
@@ -13,6 +20,7 @@ class Clock extends Component {
   }
 
   init() {
+    THCSettings = Object.assign(THCSettings, JSON.parse(localStorage.getItem('settings') || '{}'));
     this.textColors = [
       '#00F5FF',
       '#00BAFF',
@@ -32,8 +40,8 @@ class Clock extends Component {
       '#00FFBA'
     ];
 
-    this.textColorIndex = 0;
-    this.backgroundId = 1;
+    this.textColorIndex = THCSettings.textColorIndex;
+    this.backgroundId = THCSettings.backgroundId;
     this.interval;
     this.lastClick = 9999;
     this.sprintStart = 0;
@@ -108,10 +116,6 @@ class Clock extends Component {
         el.setAttribute('d', Clock.describeArc(180, 180, RING2, 0, DEGREES));
       }
     }
-
-    setInterval(() => {
-      this.updateWatch();
-    }, 1000);
   }
 
   static polarToCartesian(centerX, centerY, radius, angleInDegrees) {
@@ -136,6 +140,8 @@ class Clock extends Component {
   changeTextColor(item) {
     let el = document.getElementById(item);
     el.setAttribute('style', 'fill: ' + this.textColors[this.textColorIndex] + '; fill-opacity: .75;');
+    THCSettings.textColorIndex = this.textColorIndex;
+    localStorage.setItem('settings', JSON.stringify(THCSettings));
   }
 
   changeRingColors() {
@@ -155,13 +161,15 @@ class Clock extends Component {
     }
     //document.getElementsByTagName('body')[0].style.backgroundImage = path;
     document.getElementById('clockPage').style.backgroundImage = path;
+    THCSettings.backgroundId = this.backgroundId;
+    localStorage.setItem('settings', JSON.stringify(THCSettings));
   }
 
   updateWatch() {
     let today = new Date();
     let curTime = today.getTime();
-    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 20, 0, 0).getTime();
-    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 5, 0, 0).getTime();
+    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeEnd, 0, 0).getTime();
+    let startTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), THCSettings.rangeStart, 0, 0).getTime();
 
     let displayTime = (today).toLocaleTimeString().split(' ')[0];
 
@@ -293,7 +301,7 @@ class App extends Component {
               h('a', {href: 'https://medium.com/@cjus/time-hacker-clocks-3a1491dd02a7', target: '_blank'}, 'medium post'),
               h('p',{}, 'When back on the clock page, double click on the areas shown to interact with the clock.'),
               h('img', {id: 'clock-hit', src: './images/clickzones.png'}, ),
-              h('p',{}, 'The changes you make are stored in your browser cache to you won\'t have to change the settings each time you load the clock.'),
+              h('p',{}, 'The changes you make are stored in your browser cache so you won\'t have to change the settings each time you load the clock.'),
               h('span',{}, 'This Time Hacker Clock was created by '),
               h('a', {href: 'https://twitter.com/cjus', target: '_blank'}, '@cjus'),
               h('span',{}, ' and built using SVG and PreactJS.'),
